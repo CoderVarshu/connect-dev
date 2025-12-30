@@ -1,11 +1,30 @@
-const express = require("express")
-const app = express()
+const express = require("express");
+const cookieParser = require("cookie-parser");
+const connectDB = require("./db");
 
-app.use('/', (req,res)=> {
-    res.send("Hello from Server")
-})
+const authRouter = require("./routes/auth");
+const userRouter = require("./routes/users");
+const profileRouter = require("./routes/profile");
 
+const app = express();
+const PORT = 5000;
 
-app.listen(5000, () => {
-    console.log("Server is successfully listening")
-})
+app.use(express.json());
+app.use(cookieParser());
+
+app.use("/", authRouter);
+
+app.use("/user", userRouter);
+
+app.use("/profile", profileRouter);
+
+connectDB()
+  .then(() => {
+    console.log("DataBase Connected successfullly");
+    app.listen(PORT, () => {
+      console.log("Server is successfully listening on", { PORT });
+    });
+  })
+  .catch((err) => {
+    console.log("DB Connection failed " + err);
+  });
