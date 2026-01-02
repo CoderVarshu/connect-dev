@@ -5,6 +5,7 @@ const connectDB = require("./db");
 const authRouter = require("./routes/auth");
 const userRouter = require("./routes/users");
 const profileRouter = require("./routes/profile");
+const connectionRequestRouter = require("./routes/connectRequest");
 
 const app = express();
 const PORT = 5000;
@@ -17,6 +18,8 @@ app.use("/", authRouter);
 app.use("/user", userRouter);
 
 app.use("/profile", profileRouter);
+
+app.use("/request", connectionRequestRouter)
 
 connectDB()
   .then(() => {
