@@ -1,6 +1,7 @@
 const express = require("express");
 const userAuth = require("../middlewares/auth");
 const users = require("../models/users");
+const ConnectionReq = require("../models/connection-req");
 const userRouter = express.Router();
 
 userRouter.get("/", userAuth, async (req, res) => {
@@ -42,5 +43,33 @@ userRouter.patch("/:userId", userAuth, async (req, res) => {
     res.status(500).send({ success: false, message: err.message });
   }
 });
+
+userRouter.get("/connections", userAuth, async(req,res)=>{
+    try{
+
+        const user = req.user;
+
+        const connections = await ConnectionReq.find({
+            $or: [
+                {fromUserId: user._id, status: 'accepted'},
+                {toUserId: user._id, status: 'accepted'}
+            ]
+        }).populate('fromUserId toUserId', 'name profile skills').select(' -createdAt -updatedAt -__v');
+
+        const validateConnections = connections.map(conn => {
+            if(conn.fromUserId._id.equals(user._id)){
+                return conn.toUserId
+            } else {
+                return conn.fromUserId
+            }
+        });
+
+        res.status(200).json({success: true, validateConnections});
+
+    } catch(err){
+        res.status(500).json({error: err.message});
+    }
+})
+
 
 module.exports = userRouter;
